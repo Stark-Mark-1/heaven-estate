@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "firebase_url": "https://heavenestate-emo.firebaseio.com",
+    "project_number": "683950086919",
+    "project_id": "heavenestate-emo",
+    "storage_bucket": "heavenestate-emo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:683950086919:android:d8cea3e35c94f35e89c3a2",
+        "android_client_info": {
+          "package_name": "com.emo.HeavenEstate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVYyqPwX4Nhi99S7KUXlwnJKT5BVC0BVs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
