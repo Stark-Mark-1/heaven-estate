@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Firebase;
@@ -10,20 +9,17 @@ using EasyUI.Toast;
 
 public class FirebaseAuthManager : MonoBehaviour
 {
-    //Firebase variables
+    [SerializeField] private LoadingManager loadingManager;
+
     [Header("Firebase")]
     public DependencyStatus dependencyStatus;
     public FirebaseAuth auth;
     public FirebaseUser user;
 
-    //Login Variables
-    [Space]
     [Header("Login")]
     public TMP_InputField emailLoginField;
     public TMP_InputField passwordLoginField;
 
-    //Registration Variable
-    [Space]
     [Header("Registration")]
     public TMP_InputField nameRegisterField;
     public TMP_InputField emailRegisterField;
@@ -34,6 +30,7 @@ public class FirebaseAuthManager : MonoBehaviour
     {
         StartCoroutine(CheckAndFixDependenciesAsync());
     }
+
     private IEnumerator CheckAndFixDependenciesAsync()
     {
         var dependencyTask = FirebaseApp.CheckAndFixDependenciesAsync();
@@ -47,16 +44,17 @@ public class FirebaseAuthManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Could Not resolve all firebase dependendency" + dependencyStatus);
+            Debug.LogError("Could not resolve all Firebase dependencies: " + dependencyStatus);
         }
-
     }
-    void InitializeFirebase()
+
+    private void InitializeFirebase()
     {
         auth = FirebaseAuth.DefaultInstance;
         auth.StateChanged += AuthStateChanged;
         AuthStateChanged(this, null);
     }
+
     private IEnumerator CheckForAutoLogin()
     {
         if (user != null)
@@ -65,20 +63,17 @@ public class FirebaseAuthManager : MonoBehaviour
             yield return new WaitUntil(() => reloadUserTask.IsCompleted);
             AutoLogin();
         }
-        else
-        {
-
-        }
-
     }
+
     private void AutoLogin()
     {
         if (user != null)
         {
-            UnityEngine.SceneManagement.SceneManager.LoadScene(2);
+            SceneManager.LoadScene(2);
         }
     }
-    void AuthStateChanged(object sender, System.EventArgs eventArgs)
+
+    private void AuthStateChanged(object sender, System.EventArgs eventArgs)
     {
         if (auth.CurrentUser != user)
         {
@@ -102,8 +97,7 @@ public class FirebaseAuthManager : MonoBehaviour
         {
             auth.SignOut();
             Debug.Log("Logged Out");
-            string update = "Logged Out";
-            Toast.Show(update, 1f, Color.grey);
+            Toast.Show("Logged Out", .5f, Color.grey);
         }
     }
 
@@ -111,6 +105,7 @@ public class FirebaseAuthManager : MonoBehaviour
     {
         StartCoroutine(LoginAsync(emailLoginField.text, passwordLoginField.text));
     }
+
     private IEnumerator LoginAsync(string email, string password)
     {
         var loginTask = auth.SignInWithEmailAndPasswordAsync(email, password);
@@ -140,33 +135,38 @@ public class FirebaseAuthManager : MonoBehaviour
                     break;
             }
             Debug.Log(failedMessage);
+            Toast.Show(failedMessage, .5f, Color.grey);
         }
         else
         {
             user = loginTask.Result.User;
             Debug.LogFormat("{0} You are successfully Logged In", user.DisplayName);
-            string name = user.DisplayName;
-            Toast.Show("Welcome :" +name);
-            UnityEngine.SceneManagement.SceneManager.LoadScene(2);
+            Toast.Show("Welcome: " + user.DisplayName, 0.5f, Color.grey);
+            loadingManager.signIntohome();
         }
     }
+
     public void Register()
     {
         StartCoroutine(RegisterAsync(nameRegisterField.text, emailRegisterField.text, passwordRegisterField.text, confirmPasswordRegisterField.text));
     }
+
     private IEnumerator RegisterAsync(string name, string email, string password, string confirmPassword)
     {
         if (name == "")
         {
             Debug.LogError("User Name is Empty");
+            Toast.Show("User Name is Empty", .5f, Color.grey);
         }
         else if (email == "")
         {
             Debug.LogError("Email is Empty");
+            Toast.Show("Email is Empty", .5f, Color.grey);
         }
-        else if (passwordRegisterField.text != confirmPasswordRegisterField.text)
+        else if (password != confirmPassword)
         {
             Debug.LogError("Passwords do not match");
+            Toast.Show("Passwords do not match", .5f, Color.grey);
         }
         else
         {
@@ -177,21 +177,20 @@ public class FirebaseAuthManager : MonoBehaviour
                 Debug.LogError(registerTask.Exception);
                 FirebaseException firebaseException = registerTask.Exception.GetBaseException() as FirebaseException;
                 AuthError authError = (AuthError)firebaseException.ErrorCode;
-
-                string failedMessage = "Registration Failed Because";
+                string failedMessage = "Registration Failed Because ";
                 switch (authError)
                 {
                     case AuthError.InvalidEmail:
                         failedMessage += "Email is Invalid";
                         break;
                     case AuthError.WeakPassword:
-                        failedMessage += "Wrong Password";
+                        failedMessage += "Weak Password";
                         break;
                     case AuthError.MissingEmail:
                         failedMessage += "Missing Email";
                         break;
                     case AuthError.MissingPassword:
-                        failedMessage += "Password is Missing";
+                        failedMessage += "Missing Password";
                         break;
                     default:
                         failedMessage += "Registration Failed";
@@ -208,37 +207,14 @@ public class FirebaseAuthManager : MonoBehaviour
                 yield return new WaitUntil(() => updateProfileTask.IsCompleted);
                 if (updateProfileTask.Exception != null)
                 {
-                    user.DeleteAsync();
                     Debug.LogError(updateProfileTask.Exception);
-                    FirebaseException firebaseException = updateProfileTask.Exception.GetBaseException() as FirebaseException;
-                    AuthError authError = (AuthError)firebaseException.ErrorCode;
-                    string failedMessage = "Profile Update Failed! Because";
-                    switch (authError)
-                    {
-                        case AuthError.InvalidEmail:
-                            failedMessage += "Email is Invalid";
-                            break;
-                        case AuthError.WeakPassword:
-                            failedMessage += "Wrong Password";
-                            break;
-                        case AuthError.MissingEmail:
-                            failedMessage += "Missing Email";
-                            break;
-                        case AuthError.MissingPassword:
-                            failedMessage += "Password is Missing";
-                            break;
-                        default:
-                            failedMessage += "Profile Update Failed";
-                            break;
-                    }
-                    Debug.Log(failedMessage);
+                    Toast.Show("User Name Set Failed", .5f, Color.grey);
                 }
                 else
                 {
-                    Debug.Log("Registration Sucessful Welcome " + user.DisplayName);
-                    name = "Registration Sucessful Welcome " + user.DisplayName;
-                    Toast.Show(name, 1f,  Color.grey);
-                    UnityEngine.SceneManagement.SceneManager.LoadScene(2);
+                    Debug.LogFormat("Registration Successful: Welcome {0}!", user.DisplayName);
+                    Toast.Show("Registration Successful : Welcome " + user.DisplayName, .5f, Color.grey);
+                    loadingManager.signUptohome();
                 }
             }
         }
