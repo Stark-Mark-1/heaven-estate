@@ -115,7 +115,7 @@ public class FirebaseAuthManager : MonoBehaviour
             Debug.LogError(loginTask.Exception);
             FirebaseException firebaseException = loginTask.Exception.GetBaseException() as FirebaseException;
             AuthError authError = (AuthError)firebaseException.ErrorCode;
-            string failedMessage = "Login Failed! Because ";
+            string failedMessage = "Login Failed!";
             switch (authError)
             {
                 case AuthError.InvalidEmail:
@@ -177,7 +177,7 @@ public class FirebaseAuthManager : MonoBehaviour
                 Debug.LogError(registerTask.Exception);
                 FirebaseException firebaseException = registerTask.Exception.GetBaseException() as FirebaseException;
                 AuthError authError = (AuthError)firebaseException.ErrorCode;
-                string failedMessage = "Registration Failed Because ";
+                string failedMessage = "Registration Failed!";
                 switch (authError)
                 {
                     case AuthError.InvalidEmail:
