@@ -11,6 +11,12 @@ public class TabIndicator : MonoBehaviour
     public float bookmarkX;
     public float profileX;
 
+    public float moveSpeed = 0.2f; // Speed of the elastic movement
+    private Vector2 currentVelocity = Vector2.zero; // Used by SmoothDamp for smoothing the movement
+    private float smoothTime = 0.3f; // Time it takes to smooth the movement (adjust for a more elastic feel)
+
+    private float targetX; // Stores the target X position
+
     void Start()
     {
         if (indicator == null)
@@ -19,32 +25,36 @@ public class TabIndicator : MonoBehaviour
             return;
         }
 
-        // Optionally set the indicator to the first tab's position (Home) when the scene starts
+        // Set the initial target to the home tab's position
+        targetX = homeX;
         MoveIndicatorTo(homeX);
     }
 
-    // Function to move the indicator to a given X-axis position
-    void MoveIndicatorTo(float targetX)
+    void Update()
     {
-        if (indicator != null)
-        {
-            Debug.Log("Moving indicator to X position: " + targetX);
+        // Continuously smooth the movement towards the target position
+        SmoothMoveIndicator();
+    }
 
-            // Get the current anchoredPosition of the indicator
-            Vector2 newPosition = indicator.anchoredPosition;
+    // Function to move the indicator to a given X-axis position
+    void MoveIndicatorTo(float newTargetX)
+    {
+        Debug.Log("Moving indicator to X position: " + newTargetX);
+        targetX = newTargetX;
+    }
 
-            // Change only the X position
-            newPosition.x = targetX;
+    void SmoothMoveIndicator()
+    {
+        // Get the current anchored position of the indicator
+        Vector2 currentPosition = indicator.anchoredPosition;
 
-            // Set the new anchoredPosition (UI-relative local position)
-            indicator.anchoredPosition = newPosition;
+        // Smoothly move towards the target X position using SmoothDamp
+        currentPosition.x = Mathf.SmoothDamp(currentPosition.x, targetX, ref currentVelocity.x, smoothTime);
 
-            Debug.Log("Indicator moved to anchored position: " + indicator.anchoredPosition);
-        }
-        else
-        {
-            Debug.LogError("Indicator reference is missing!");
-        }
+        // Update the indicator's position
+        indicator.anchoredPosition = currentPosition;
+
+        Debug.Log("Current Indicator Position: " + indicator.anchoredPosition);
     }
 
     // Function for the Home tab
