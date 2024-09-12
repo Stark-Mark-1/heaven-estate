@@ -11,9 +11,9 @@ public class TabIndicator : MonoBehaviour
     public float bookmarkX;
     public float profileX;
 
-    public float moveSpeed = 0.2f; // Speed of the elastic movement
+    public float moveSpeed = 0.7f; // Speed of the elastic movement
     private Vector2 currentVelocity = Vector2.zero; // Used by SmoothDamp for smoothing the movement
-    private float smoothTime = 0.3f; // Time it takes to smooth the movement (adjust for a more elastic feel)
+    private float smoothTime = 0.1f; // Time it takes to smooth the movement (adjust for a more elastic feel)
 
     private float targetX; // Stores the target X position
 
